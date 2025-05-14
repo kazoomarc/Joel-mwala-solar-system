@@ -1,11 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include "Shader.h"
 #include "Camera.h"
 #include "Planet.h"
@@ -27,7 +25,7 @@ const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
 
 // Camera - Position it to see the entire solar system at first glance
-Camera camera(glm::vec3(0.0f, 50.0f, 120.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 160.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -224,9 +222,9 @@ void processInput(GLFWwindow *window)
 
     // Sun rotation speed control
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        sun->adjustRotationSpeed(0.1f);
+        sun->adjustRotationSpeed(0.4f);
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        sun->adjustRotationSpeed(-0.1f);
+        sun->adjustRotationSpeed(-0.4f);
 
     // Moon orbit speed control (for Earth's moon)
     Planet *earth = planets[2]; // Earth is the third planet
@@ -234,9 +232,9 @@ void processInput(GLFWwindow *window)
     {
         Planet *moon = earth->moons[0];
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            moon->adjustOrbitSpeed(0.1f);
+            moon->adjustOrbitSpeed(0.4f);
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            moon->adjustOrbitSpeed(-0.1f);
+            moon->adjustOrbitSpeed(-0.4f);
     }
 }
 

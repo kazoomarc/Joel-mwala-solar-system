@@ -1,6 +1,5 @@
 #ifndef MODERN_SPHERE_H
 #define MODERN_SPHERE_H
-
 #include <glad/glad.h>
 #include <vector>
 #include "Sphere.h"
