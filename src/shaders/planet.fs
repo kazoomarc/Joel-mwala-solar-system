@@ -33,8 +33,15 @@ void main() {
     
     vec3 pointDiffuse = pointDiff * pointLightColor * attenuation;
     
+    // Specular
+    float specularStrength = 0.5;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDirection, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * lightColor;
+    
     // Combine results
-    vec3 result = (ambient + diffuse + pointDiffuse);
+    vec3 result = (ambient + diffuse + pointDiffuse + specular);
     vec4 texColor = texture(texture1, TexCoords);
     
     FragColor = vec4(result, 1.0) * texColor;

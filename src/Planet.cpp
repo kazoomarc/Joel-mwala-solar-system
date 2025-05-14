@@ -19,6 +19,12 @@ Planet::Planet(float radius, float orbSpeed, float rotSpeed, float size, const c
 Planet::~Planet()
 {
     glDeleteTextures(1, &textureID);
+
+    // Delete moons
+    for (auto moon : moons)
+    {
+        delete moon;
+    }
 }
 
 void Planet::update(float deltaTime)
@@ -36,6 +42,9 @@ void Planet::update(float deltaTime)
     // Update position based on orbit angle
     position.x = orbitRadius * cos(glm::radians(orbitAngle));
     position.z = orbitRadius * sin(glm::radians(orbitAngle));
+
+    // Update moons
+    updateMoons(deltaTime);
 }
 
 void Planet::render(Shader &shader, ModernSphere &sphere, glm::mat4 view, glm::mat4 projection)
@@ -55,6 +64,9 @@ void Planet::render(Shader &shader, ModernSphere &sphere, glm::mat4 view, glm::m
 
     // Draw sphere
     sphere.draw();
+
+    // Render moons
+    renderMoons(shader, sphere, view, projection);
 }
 
 glm::mat4 Planet::getModelMatrix()
@@ -126,4 +138,41 @@ void Planet::loadTexture(const char *texturePath)
     }
 
     stbi_image_free(data);
+}
+
+void Planet::addMoon(Planet *moon)
+{
+    moons.push_back(moon);
+}
+
+void Planet::updateMoons(float deltaTime)
+{
+    for (auto moon : moons)
+    {
+        // Update moon's own rotation
+        moon->rotationAngle += moon->rotationSpeed * deltaTime;
+        if (moon->rotationAngle > 360.0f)
+            moon->rotationAngle -= 360.0f;
+
+        // Update moon's orbit around this planet
+        moon->orbitAngle += moon->orbitSpeed * deltaTime;
+        if (moon->orbitAngle > 360.0f)
+            moon->orbitAngle -= 360.0f;
+
+        // Calculate moon position relative to this planet
+        glm::vec3 moonRelativePos;
+        moonRelativePos.x = moon->orbitRadius * cos(glm::radians(moon->orbitAngle));
+        moonRelativePos.z = moon->orbitRadius * sin(glm::radians(moon->orbitAngle));
+
+        // Set moon position to be relative to this planet
+        moon->position = position + moonRelativePos;
+    }
+}
+
+void Planet::renderMoons(Shader &shader, ModernSphere &sphere, glm::mat4 view, glm::mat4 projection)
+{
+    for (auto moon : moons)
+    {
+        moon->render(shader, sphere, view, projection);
+    }
 }

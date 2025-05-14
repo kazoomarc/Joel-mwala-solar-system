@@ -26,8 +26,8 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
 
-// Camera
-Camera camera(glm::vec3(0.0f, 10.0f, 30.0f));
+// Camera - Position it to see the entire solar system at first glance
+Camera camera(glm::vec3(0.0f, 50.0f, 120.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -40,8 +40,6 @@ float lastFrame = 0.0f;
 // Planets
 Planet *sun;
 std::vector<Planet *> planets;
-Planet *moon;
-Planet *earth;
 
 int main()
 {
@@ -71,7 +69,7 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // Capture mouse
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -94,19 +92,48 @@ int main()
     Sphere sphereModel(1.0f, 36, 18, true);
     ModernSphere modernSphere(sphereModel);
 
-    // Create planets
+    // Create sun
     // Parameters: orbit radius, orbit speed, rotation speed, scale, texture path
-    sun = new Planet(0.0f, 0.0f, 10.0f, 5.0f, "textures/sunmap.jpg");
+    sun = new Planet(0.0f, 0.0f, 10.0f, 8.0f, "textures/sunmap.jpg");
 
-    // Create planets
-    planets.push_back(new Planet(15.0f, 47.0f, 20.0f, 1.0f, "textures/mercurymap.jpg")); // Mercury
-    planets.push_back(new Planet(22.0f, 35.0f, 15.0f, 1.8f, "textures/venusmap.jpg"));   // Venus
-    earth = new Planet(30.0f, 30.0f, 25.0f, 2.0f, "textures/earthmap1k.jpg");            // Earth
+    // Create all nine planets with varying orbit radii, speeds, and scales
+    // Mercury
+    Planet *mercury = new Planet(15.0f, 47.0f, 20.0f, 0.8f, "textures/mercurymap.jpg");
+    planets.push_back(mercury);
+
+    // Venus
+    Planet *venus = new Planet(22.0f, 35.0f, 15.0f, 1.5f, "textures/venusmap.jpg");
+    planets.push_back(venus);
+
+    // Earth with Moon
+    Planet *earth = new Planet(30.0f, 30.0f, 25.0f, 1.6f, "textures/earthmap1k.jpg");
+    Planet *moon = new Planet(3.0f, 80.0f, 15.0f, 0.4f, "textures/moonmap1k.jpg");
+    earth->addMoon(moon);
     planets.push_back(earth);
-    planets.push_back(new Planet(40.0f, 24.0f, 20.0f, 1.5f, "textures/marsmap1k.jpg")); // Mars
 
-    // Create moon
-    moon = new Planet(5.0f, 80.0f, 15.0f, 0.5f, "textures/moonmap1k.jpg");
+    // Mars
+    Planet *mars = new Planet(40.0f, 24.0f, 20.0f, 1.2f, "textures/marsmap1k.jpg");
+    planets.push_back(mars);
+
+    // Jupiter
+    Planet *jupiter = new Planet(55.0f, 13.0f, 12.0f, 4.0f, "textures/jupitermap.jpg");
+    planets.push_back(jupiter);
+
+    // Saturn
+    Planet *saturn = new Planet(70.0f, 9.0f, 10.0f, 3.5f, "textures/saturnmap.png");
+    planets.push_back(saturn);
+
+    // Uranus
+    Planet *uranus = new Planet(85.0f, 6.0f, 8.0f, 2.5f, "textures/uranusmap.png");
+    planets.push_back(uranus);
+
+    // Neptune
+    Planet *neptune = new Planet(100.0f, 5.0f, 7.0f, 2.4f, "textures/neptunemap.jpg");
+    planets.push_back(neptune);
+
+    // Pluto (including it as the ninth planet)
+    Planet *pluto = new Planet(115.0f, 4.0f, 5.0f, 0.6f, "textures/plutomap.png");
+    planets.push_back(pluto);
 
     // Initialize timer
     timer.start();
@@ -145,10 +172,14 @@ int main()
         planetShader.setMat4("view", view);
 
         // Set lighting uniforms
-        planetShader.setVec3("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));       // Directional light from above
-        planetShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 0.9f));      // Yellow light
-        planetShader.setVec3("pointLightPos", glm::vec3(0.0f, 10.0f, 0.0f));  // Blue point light above sun
-        planetShader.setVec3("pointLightColor", glm::vec3(0.0f, 0.0f, 1.0f)); // Blue color
+        // Yellow directional light (from above)
+        planetShader.setVec3("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
+        planetShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 0.8f));
+
+        // Blue point light above sun
+        planetShader.setVec3("pointLightPos", glm::vec3(0.0f, 10.0f, 0.0f));
+        planetShader.setVec3("pointLightColor", glm::vec3(0.0f, 0.0f, 1.0f));
+
         planetShader.setVec3("viewPos", camera.Position);
 
         // Update and render planets
@@ -157,24 +188,6 @@ int main()
             planet->update(deltaTime);
             planet->render(planetShader, modernSphere, view, projection);
         }
-
-        // Update moon position relative to Earth
-        glm::vec3 earthPos = earth->position;
-        float moonOrbitAngle = moon->orbitAngle;
-
-        // Calculate moon position relative to Earth
-        glm::vec3 moonRelativePos;
-        moonRelativePos.x = moon->orbitRadius * cos(glm::radians(moonOrbitAngle));
-        moonRelativePos.z = moon->orbitRadius * sin(glm::radians(moonOrbitAngle));
-
-        // Set moon position to be relative to Earth
-        moon->position = earthPos + moonRelativePos;
-
-        // Update moon rotation
-        moon->update(deltaTime);
-
-        // Render moon
-        moon->render(planetShader, modernSphere, view, projection);
 
         // Swap buffers and poll IO events
         glfwSwapBuffers(window);
@@ -187,7 +200,6 @@ int main()
     {
         delete planet;
     }
-    delete moon;
 
     // Terminate GLFW
     glfwTerminate();
@@ -216,11 +228,16 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         sun->adjustRotationSpeed(-0.1f);
 
-    // Moon orbit speed control
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        moon->adjustOrbitSpeed(0.1f);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        moon->adjustOrbitSpeed(-0.1f);
+    // Moon orbit speed control (for Earth's moon)
+    Planet *earth = planets[2]; // Earth is the third planet
+    if (earth && !earth->moons.empty())
+    {
+        Planet *moon = earth->moons[0];
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+            moon->adjustOrbitSpeed(0.1f);
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            moon->adjustOrbitSpeed(-0.1f);
+    }
 }
 
 // GLFW: whenever the window size changed, this callback function executes

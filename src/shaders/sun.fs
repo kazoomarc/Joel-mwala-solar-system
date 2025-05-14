@@ -6,5 +6,7 @@ in vec2 TexCoords;
 uniform sampler2D texture1;
 
 void main() {
-    FragColor = texture(texture1, TexCoords);
+    vec4 texColor = texture(texture1, TexCoords);
+    // Add a glow effect to the sun
+    FragColor = texColor * 1.2; // Make it slightly brighter
 }

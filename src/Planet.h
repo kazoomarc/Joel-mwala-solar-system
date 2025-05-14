@@ -4,10 +4,10 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 #include <string>
 #include "Shader.h"
-#include "Sphere.h"
-#include "ModernSphere.h" // Add this include
+#include "ModernSphere.h"
 
 class Planet
 {
@@ -19,7 +19,9 @@ public:
     float rotationSpeed;
     float scale;
     float orbitAngle;
+    float rotationAngle;
     unsigned int textureID;
+    std::vector<Planet *> moons;
 
     // Constructor
     Planet(float radius, float orbSpeed, float rotSpeed, float size, const char *texturePath);
@@ -42,9 +44,16 @@ public:
     // Get model matrix
     glm::mat4 getModelMatrix();
 
-private:
-    float rotationAngle;
+    // Add a moon to this planet
+    void addMoon(Planet *moon);
 
+    // Update moons
+    void updateMoons(float deltaTime);
+
+    // Render moons
+    void renderMoons(Shader &shader, ModernSphere &sphere, glm::mat4 view, glm::mat4 projection);
+
+private:
     // Load texture
     void loadTexture(const char *texturePath);
 };
