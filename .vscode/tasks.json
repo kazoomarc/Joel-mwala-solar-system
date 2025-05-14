@@ -7,16 +7,24 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
+                "-I", "${workspaceFolder}/include",
                 "-g",
-                "${file}",
+                "${workspaceFolder}/src/main.cpp",
                 "${workspaceFolder}/src/glad.c",
+                "${workspaceFolder}/src/Planet.cpp",
+                "${workspaceFolder}/src/Shader.cpp",
+                "${workspaceFolder}/src/Sphere.cpp",
+                "${workspaceFolder}/src/Camera.cpp",
+                "${workspaceFolder}/src/ModernSphere.cpp",
+                "${workspaceFolder}/src/Timer.cpp",
+                "${workspaceFolder}/src/stb_image.cpp",
                 "-I",
-                "${workspaceFolder}/include",
+                "${workspaceFolder}/src",
                 "-lglfw",
                 "-ldl",
                 "-lGL",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${workspaceFolder}/build/solar-system"
             ],
             "options": {
                 "cwd": "${fileDirname}"
